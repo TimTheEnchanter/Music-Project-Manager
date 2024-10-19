@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using System.Web.Mvc;
+//using System.Web.Mvc;
 
 namespace MusicProjectManager.Controllers
 {
@@ -53,4 +53,71 @@ namespace MusicProjectManager.Controllers
             }
 
         }
+
+
+        // To fill data in the form 
+        // to enable easy editing
+        public ActionResult Update(int Projectid)
+        {
+            using (var context = new musicCRUDEntities())
+            {
+                var data = context.Project.Where(x => x.ProjectNo == Projectid).SingleOrDefault();
+                return View(data);
+            }
+        }
+
+        // To specify that this will be 
+        // invoked when post method is called
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Update(int Projectid, Project model)
+        {
+            using (var context = new musicCRUDEntities())
+            {
+
+                // Use of lambda expression to access
+                // particular record from a database
+                var data = context.Project.FirstOrDefault(x => x.ProjectNo == Projectid);
+
+                // Checking if any such record exist 
+                if (data != null)
+                {
+                    data.Name = model.Name;
+                    data.Type = model.Type;
+                    data.StartDate = model.StartDate;
+                    data.Description = model.Description;
+                    context.SaveChanges();
+
+                    // It will redirect to 
+                    // the Read method
+                    return RedirectToAction("Read");
+                }
+                else
+                    return View();
+            }
+        }
+
+        public ActionResult Delete()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(int Projectid)
+        {
+            using (var context = new musicCRUDEntities())
+            {
+                var data = context.Project.FirstOrDefault(x => x.ProjectNo == Projectid);
+                if (data != null)
+                {
+                    context.Project.Remove(data);
+                    context.SaveChanges();
+                    return RedirectToAction("Read");
+                }
+                else
+                    return View();
+            }
+        }
     }
+}
